@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
-import { JwtGuard } from 'src/auth/guard';
 import { CommentsService } from './comments.service';
-import { GetUser } from 'src/auth/decorator';
 import { Comment, User } from '@prisma/client';
 import { CreateCommentDto, UpdateCommentDto } from './dto';
+import { JwtGuard } from 'src/user/guard';
+import { GetUser } from 'src/user/decorator';
 
 @UseGuards(JwtGuard)
 @Controller('comments')

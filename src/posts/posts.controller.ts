@@ -2,8 +2,8 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGua
 import { PostsService } from './posts.service';
 import type { User, Post as PostType } from '@prisma/client';
 import { UpdatePostDto, CreatePostDto } from './dto';
-import { JwtGuard } from 'src/auth/guard';
-import { GetUser } from 'src/auth/decorator';
+import { JwtGuard } from 'src/user/guard';
+import { GetUser } from 'src/user/decorator';
 
 @UseGuards(JwtGuard)
 @Controller('posts')

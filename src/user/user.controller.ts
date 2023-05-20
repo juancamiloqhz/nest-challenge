@@ -1,14 +1,21 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { GetUser } from 'src/auth/decorator';
-import { JwtGuard } from 'src/auth/guard';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { UserService } from './user.service';
+import { AuthDto } from './dto';
 
-@UseGuards(JwtGuard)
+
 @Controller('users')
 export class UserController {
+  constructor(private userService: UserService) { }
 
-  @Get('me')
-  getMe(@GetUser() user: User) {
-    return user;
+  @Post('sign_up')
+  signup(@Body() dto: AuthDto) {
+    return this.userService.signup(dto);
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('sign_in')
+  signin(@Body() dto: AuthDto) {
+    return this.userService.signin(dto);
+  }
+
 }
