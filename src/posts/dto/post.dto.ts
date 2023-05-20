@@ -1,5 +1,5 @@
+import { PostStatus } from '@prisma/client';
 import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
-import { PostStatus } from '../post.entity';
 
 export class CreatePostDto {
   @IsString()
@@ -17,6 +17,11 @@ export class CreatePostDto {
   @IsString()
   @IsNotEmpty()
   slug: string;
+
+  @IsString()
+  @IsOptional()
+  @IsEnum(PostStatus)
+  status?: PostStatus;
 }
 
 export class UpdatePostDto {

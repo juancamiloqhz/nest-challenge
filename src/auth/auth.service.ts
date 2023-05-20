@@ -5,6 +5,7 @@ import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +25,7 @@ export class AuthService {
           password: hash,
         },
       });
-      return await this.signToken(user.id, user.email);
+      return await this.signToken(user);
     } catch (error) {
       if (error.constructor.name === PrismaClientKnownRequestError.name) {
         if (error.code === 'P2002') {
@@ -51,21 +52,25 @@ export class AuthService {
       throw new ForbiddenException('Wrong password');
     }
 
-    return await this.signToken(user.id, user.email);
+    return await this.signToken(user);
   }
 
-  async signToken(
-    userId: number,
-    email: string,
-  ): Promise<{ access_token: string }> {
-    const payload = { sub: userId, email };
+  async signToken(user: User): Promise<{ auth_token: string; user: Omit<User, "createdAt" | "updatedAt" | "password"> }> {
+    const payload = { sub: user.id, email: user.email };
     const secret = this.config.get('JWT_SECRET');
     const token = await this.jwt.signAsync(payload, {
-      expiresIn: '15m',
+      expiresIn: '1h',
       secret,
     });
     return {
-      access_token: token,
+      auth_token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
     }
   }
 
