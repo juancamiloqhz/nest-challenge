@@ -84,9 +84,18 @@ export class UserService {
   }
 
   async changePassword(dto: ChangePasswordDto, user: User) {
-    console.log("changePassword: ", { user });
+    const currentUser = await this.prisma.user.findUnique({
+      where: {
+        id: user.id,
+      },
+    });
+
+    if (!currentUser) {
+      throw new ForbiddenException('User not found');
+    }
+
     const isPasswordValid = await argon.verify(
-      user.password,
+      currentUser.password,
       dto.oldPassword,
     );
     if (!isPasswordValid) {
@@ -104,6 +113,9 @@ export class UserService {
   }
 
   async changeRole(dto: ChangeUserRoleDto, user: User) {
+    if (user.role !== 'ADMIN') {
+      throw new ForbiddenException('You are not allowed to do this');
+    }
     return await this.prisma.user.update({
       where: {
         id: user.id,
