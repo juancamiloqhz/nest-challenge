@@ -22,6 +22,12 @@ export class UserController {
   }
 
   @UseGuards(JwtGuard)
+  @Get()
+  getAllUsers(@GetUser() user: User) {
+    return this.userService.getAllUsers(user);
+  }
+
+  @UseGuards(JwtGuard)
   @Get('me')
   me(@GetUser() user: User) {
     return user;

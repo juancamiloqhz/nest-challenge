@@ -74,6 +74,21 @@ export class UserService {
     return await this.signToken(user);
   }
 
+  async getAllUsers(user: User) {
+    if (user.role !== 'ADMIN') {
+      throw new ForbiddenException('You are not allowed');
+    }
+    return await this.prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+      },
+    });
+  }
+
   async updateUser(dto: UpdateUserDto, userId: number) {
     return await this.prisma.user.update({
       where: {
