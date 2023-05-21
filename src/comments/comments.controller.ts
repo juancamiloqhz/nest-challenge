@@ -2,8 +2,8 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGua
 import { CommentsService } from './comments.service';
 import { Comment, User } from '@prisma/client';
 import { CreateCommentDto, UpdateCommentDto } from './dto';
-import { JwtGuard } from 'src/user/guard';
-import { GetUser } from 'src/user/decorator';
+import { JwtGuard } from '../user/guard';
+import { GetUser } from '../user/decorator';
 
 @UseGuards(JwtGuard)
 @Controller('comments')

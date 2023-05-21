@@ -11,5 +11,16 @@ services:
     restart: always
     networks:
       - nest-challenge
+  test-db:
+    image: postgres:13
+    ports:
+      - 5435:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nest
+    restart: always
+    networks:
+      - nest-challenge
 networks:
   nest-challenge:

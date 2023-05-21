@@ -52,7 +52,7 @@ model Post {
   publishedAt DateTime?
 
   userId      Int
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   comments    Comment[]
 
@@ -67,10 +67,10 @@ model Comment {
   content     String
 
   postId      Int
-  post        Post      @relation(fields: [postId], references: [id])
+  post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   
   userId      Int
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("comments")
 }

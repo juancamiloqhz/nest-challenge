@@ -3,7 +3,7 @@ import * as argon from 'argon2';
 
 const prisma = new PrismaClient()
 
-async function main() {
+export async function main() {
 
   const hash = await argon.hash("password");
 
@@ -86,7 +86,8 @@ async function main() {
       },
     },
   })
-  console.log({ adminUser, regularUserOne, regularUserTwo })
+  // console.log({ adminUser, regularUserOne, regularUserTwo })
+  console.log("🌱 Database seeded. ✅")
 }
 main()
   .then(async () => {

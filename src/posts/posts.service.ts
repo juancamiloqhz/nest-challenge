@@ -1,18 +1,38 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreatePostDto, UpdatePostDto } from './dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { Post, PostStatus, User } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { PrismaService } from '../prisma/prisma.service';
+import { Post, PostStatus, User, Prisma } from '@prisma/client';
 
 @Injectable()
 export class PostsService {
   constructor(private prisma: PrismaService) { }
 
   // (Helper function) Get a single post by id and include the user id
-  async getPostById(id: number): Promise<Post & { user: { id: number } }> {
+  async getPostByIdWithUser(id: number): Promise<Post & { user: { id: number } }> {
     const post = await this.prisma.post.findUnique({
       where: { id },
       include: { user: { select: { id: true } } },
+    });
+    if (!post) {
+      throw new ForbiddenException('Post not found');
+    }
+    return post;
+  }
+
+  // Get all posts that are published
+  async getPostById(id: number): Promise<Omit<Post, "status" | "createdAt" | "updatedAt" | "userId">> {
+    const post = await this.prisma.post.findFirst({
+      where: {
+        id,
+        status: PostStatus.PUBLISHED,
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        slug: true,
+        publishedAt: true,
+      },
     });
     if (!post) {
       throw new ForbiddenException('Post not found');
@@ -54,7 +74,7 @@ export class PostsService {
       });
       return newPost;
     } catch (error) {
-      if (error.constructor.name === PrismaClientKnownRequestError.name) {
+      if (error.constructor.name === Prisma.PrismaClientKnownRequestError.name) {
         if (error.code === 'P2002') {
           throw new ForbiddenException('Slug is taken. Please try another slug');
         }
@@ -65,8 +85,7 @@ export class PostsService {
 
   // Update a post
   async updatePost(id: number, dto: UpdatePostDto, user: User): Promise<Post> {
-    const post = await this.getPostById(id);
-    console.log(dto)
+    const post = await this.getPostByIdWithUser(id);
     // Check if the user is the owner of the post
     if (post.user.id !== user.id) {
       throw new ForbiddenException('Not Authorized');
@@ -94,7 +113,7 @@ export class PostsService {
 
   // Delete a post
   async deletePost(id: number, user: User): Promise<string> {
-    const post = await this.getPostById(id);
+    const post = await this.getPostByIdWithUser(id);
 
     // Check if the user is the owner of the post
     if (post.user.id !== user.id) {

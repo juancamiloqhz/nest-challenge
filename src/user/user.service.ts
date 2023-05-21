@@ -1,11 +1,10 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthDto } from './dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { AuthDto, ChangePasswordDto, ChangeUserRoleDto, UpdateUserDto } from './dto'
 import * as argon from 'argon2';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { User } from '@prisma/client';
+import { User, Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -14,6 +13,26 @@ export class UserService {
     private jwt: JwtService,
     private config: ConfigService,
   ) { }
+
+  // (Helper function) This function is used to sign a token for a user
+  async signToken(user: User): Promise<{ auth_token: string; user: Omit<User, "createdAt" | "updatedAt" | "password"> }> {
+    const payload = { sub: user.id, email: user.email };
+    const secret = this.config.get('JWT_SECRET');
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '1h',
+      secret,
+    });
+    return {
+      auth_token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    }
+  }
 
   async signup(dto: AuthDto) {
     const hash = await argon.hash(dto.password);
@@ -27,7 +46,7 @@ export class UserService {
       });
       return await this.signToken(user);
     } catch (error) {
-      if (error.constructor.name === PrismaClientKnownRequestError.name) {
+      if (error.constructor.name === Prisma.PrismaClientKnownRequestError.name) {
         if (error.code === 'P2002') {
           throw new ForbiddenException('Credentials are taken');
         }
@@ -55,23 +74,44 @@ export class UserService {
     return await this.signToken(user);
   }
 
-  async signToken(user: User): Promise<{ auth_token: string; user: Omit<User, "createdAt" | "updatedAt" | "password"> }> {
-    const payload = { sub: user.id, email: user.email };
-    const secret = this.config.get('JWT_SECRET');
-    const token = await this.jwt.signAsync(payload, {
-      expiresIn: '1h',
-      secret,
-    });
-    return {
-      auth_token: token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
+  async updateUser(dto: UpdateUserDto, userId: number) {
+    return await this.prisma.user.update({
+      where: {
+        id: userId,
       },
+      data: dto,
+    });
+  }
+
+  async changePassword(dto: ChangePasswordDto, user: User) {
+    console.log("changePassword: ", { user });
+    const isPasswordValid = await argon.verify(
+      user.password,
+      dto.oldPassword,
+    );
+    if (!isPasswordValid) {
+      throw new ForbiddenException('Wrong password');
     }
+    const hash = await argon.hash(dto.newPassword);
+    return await this.prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        password: hash,
+      },
+    });
+  }
+
+  async changeRole(dto: ChangeUserRoleDto, user: User) {
+    return await this.prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        role: dto.role,
+      },
+    });
   }
 
 }

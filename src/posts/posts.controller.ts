@@ -2,8 +2,8 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGua
 import { PostsService } from './posts.service';
 import type { User, Post as PostType } from '@prisma/client';
 import { UpdatePostDto, CreatePostDto } from './dto';
-import { JwtGuard } from 'src/user/guard';
-import { GetUser } from 'src/user/decorator';
+import { JwtGuard } from '../user/guard';
+import { GetUser } from '../user/decorator';
 
 @UseGuards(JwtGuard)
 @Controller('posts')
@@ -13,6 +13,11 @@ export class PostsController {
   @Get()
   getAllPosts(): Promise<Omit<PostType, "status" | "createdAt" | "updatedAt" | "userId">[]> {
     return this.postsService.getAllPosts();
+  }
+
+  @Get(":id")
+  getPostsById(@Param("id", ParseIntPipe) id: number): Promise<Omit<PostType, "status" | "createdAt" | "updatedAt" | "userId">> {
+    return this.postsService.getPostById(id);
   }
 
   @Post()
