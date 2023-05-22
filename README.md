@@ -18,11 +18,11 @@ With the following routes:
   - `POST /sign_in`
 - **Users**: `/api/v1/users` _(protected)_
   - `GET /`
-  - `GET /me`
-  - `PATCH /`
-  - `PATCH /change_password`
-  - `PATCH /change_role`
-  - `DELETE /`
+  - `GET /me` _Get the current user info_
+  - `PATCH /` _Update the current user info_
+  - `PATCH /change_password` _Change the current user password_
+  - `PATCH /change_role` _Change the current user role (admin only)_
+  - `DELETE /` _Delete the current user account_
 - **Posts**: `/api/v1/posts` _(protected)_
   - `GET /` _All PUBLISHED posts_
   - `GET /:id` _Get a PUBLISHED post_

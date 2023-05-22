@@ -44,3 +44,8 @@ Feature: User Module
         And make a PATCH request to "/api/v1/users/change_role" with:
             | role     | "ADMIN"           |
         Then The response status code should be 403
+
+    Scenario: Delete the current User
+        Given I Sign Up a new User
+        And make a DELETE request to "/api/v1/users"
+        Then The response status code should be 200

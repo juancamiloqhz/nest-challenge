@@ -167,10 +167,8 @@ export class requests {
       POST.set('Authorization', 'Bearer ' + this.context.auth_token);
     }
     const response = await POST.send(body);
-    console.log(response.body)
     this.context.response = response;
     this.context.post_id = response.body.id;
-    console.log(this.context.post_id)
   }
 
   @when(/make a PATCH request to "([^"]*)" with:/)
@@ -207,6 +205,17 @@ export class requests {
     }
 
     this.context.response = await PATCH.send(this.context.tableToObject(table));
+  }
+
+  @when(/make a DELETE request to "([^"]*)"/)
+  public async deleteRequest(url: string) {
+    const DELETE = request(this.context.app.getHttpServer()).delete(url);
+
+    if (this.context.auth_token) {
+      DELETE.set('Authorization', 'Bearer ' + this.context.auth_token);
+    }
+
+    this.context.response = await DELETE.send();
   }
 
   @when(/make a DELETE request to DELETE a Post to "([^"]*)"/)

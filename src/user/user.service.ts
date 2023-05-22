@@ -141,4 +141,22 @@ export class UserService {
     });
   }
 
+  async deleteUser(user: User) {
+    const currentUser = await this.prisma.user.findUnique({
+      where: {
+        id: user.id,
+      },
+    });
+
+    if (!currentUser) {
+      throw new ForbiddenException('User not found');
+    }
+
+    return await this.prisma.user.delete({
+      where: {
+        id: user.id,
+      },
+    });
+  }
+
 }

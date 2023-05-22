@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthDto, ChangePasswordDto, ChangeUserRoleDto, UpdateUserDto } from './dto';
 import { JwtGuard } from './guard';
@@ -49,6 +49,12 @@ export class UserController {
   @Patch('change_role')
   changeRole(@Body() dto: ChangeUserRoleDto, @GetUser() user: User) {
     return this.userService.changeRole(dto, user);
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete()
+  deleteUser(@GetUser() user: User) {
+    return this.userService.deleteUser(user);
   }
 }
 
